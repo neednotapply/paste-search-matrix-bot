@@ -1,6 +1,6 @@
-# Paste Search Discord Bot
+# Paste Search Matrix Bot
 
-A Discord bot that allows users to search for terms on Pastebin.com, providing a quick and easy way to gather data from public pastes.
+A Matrix bot that allows users to search for terms on Pastebin.com, providing a quick and easy way to gather data from public pastes.
 
 ```
  __________                  __             __     ________             .___ 
@@ -18,19 +18,19 @@ Created by [RocketGod](https://github.com/RocketGod-git)
 1. **Clone the Repository**
 
     ```bash
-    git clone https://github.com/RocketGod-git/paste-search-discord-bot.git
-    cd paste-search-discord-bot
+    git clone https://github.com/neednotapply/paste-search-matrix-bot.git
+    cd paste-search-matrix-bot
     ```
 
 2. **Install Required Libraries**
 
     ```bash
-    pip install discord aiohttp
+    pip install matrix aiohttp
     ```
 
 3. **Setup the Configuration**
 
-    Edit the `config.json` file and replace `YOUR-TOKEN-HERE` with your Discord bot token.
+    Edit the `config.json` file and replace `YOUR-TOKEN-HERE` with your Matrix bot token.
 
 4. **Run the Bot**
 
@@ -58,6 +58,6 @@ This project is licensed under the [AGPL-3.0 license] See the [LICENSE](LICENSE)
 
 ---
 
-**Note**: Ensure you provide adequate documentation regarding the bot's permissions on Discord and any rate limits or restrictions associated with the public API you're using. Users should be made aware of potential limitations.
+**Note**: Ensure you provide adequate documentation regarding the bot's permissions on Matrix and any rate limits or restrictions associated with the public API you're using. Users should be made aware of potential limitations.
 
 ![rocketgod_logo](https://github.com/RocketGod-git/shodanbot/assets/57732082/7929b554-0fba-4c2b-b22d-6772d23c4a18)
