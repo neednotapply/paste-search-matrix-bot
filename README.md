@@ -25,7 +25,7 @@ Created by [RocketGod](https://github.com/RocketGod-git)
 2. **Install Required Libraries**
 
     ```bash
-    pip install matrix aiohttp
+    pip install matrix-nio aiohttp
     ```
 
 3. **Setup the Configuration**
