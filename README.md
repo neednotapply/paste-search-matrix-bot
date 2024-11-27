@@ -8,10 +8,12 @@ A Matrix bot that allows users to search for terms on Pastebin.com, providing a 
   |       _/ /  _ \ _/ ___\ |  |/ /_/ __ \\   __\/   \  ___  /  _ \  / __ |  
   |    |   \(  <_> )\  \___ |    < \  ___/ |  |  \    \_\  \(  <_> )/ /_/ |  
   |____|_  / \____/  \___  >|__|_ \ \___  >|__|   \______  / \____/ \____ |  
-         \/              \/      \/     \/               \/              \/  
+         \/              \/      \/     \/               \/              \/
+                                                          & NeedNotApply 🙃  
 ```
 
-Created by [RocketGod](https://github.com/RocketGod-git)
+Created by [RocketGod](https://github.com/RocketGod-git)  
+Modified for Matrix use by [NeedNotApply](https://github.com/neednotapply)  
 
 ## Installation
 
@@ -30,17 +32,17 @@ Created by [RocketGod](https://github.com/RocketGod-git)
 
 3. **Setup the Configuration**
 
-    Edit the `config.json` file and replace `YOUR-TOKEN-HERE` with your Matrix bot token.
+    Edit the `config.json` file, replace `@your_bot_username:matrix.org` with your Matrix bot's username, replace `your_bot_password` with your Matrix bot's password and adjust the `homeserver_url` appropriately if the bot will not belong to the default `https://matrix.org` federation.
 
-4. **Run the Bot**
+5. **Run the Bot**
 
-    ```bash
+    ```bashhttps://github.com/neednotapply
     python pastesearch.py
     ```
 
 ## Commands
 
-- `/pastes [query]` - Search for a term on Pastebin.com and retrieve the top results.
+- `!pastes [query]` - Search for a term on Pastebin.com and retrieve the top 20 results.
 
 ## Contributing
 
