@@ -3,17 +3,26 @@ import logging
 import os
 import aiohttp
 import asyncio
-from nio import AsyncClient, RoomMessageText, InviteMemberEvent, SendRetryError, UploadResponse
+from nio import (
+    AsyncClient,
+    RoomMessageText,
+    InviteMemberEvent,
+    SendRetryError,
+    UploadResponse,
+)
+from nio.responses import LoginResponse, LoginError, ErrorResponse
 
 logging.basicConfig(level=logging.DEBUG)
 
+
 def load_config():
     try:
-        with open('config.json', 'r') as file:
+        with open("config.json", "r") as file:
             return json.load(file)
     except Exception as e:
         logging.error(f"Error loading configuration: {e}")
         return None
+
 
 class MatrixBotClient:
     def __init__(self, homeserver, user_id, password):
@@ -24,11 +33,15 @@ class MatrixBotClient:
     async def login(self):
         try:
             response = await self.client.login(self.password)
-            if response and response.get("errcode"):
-                logging.error(f"Failed to login: {response.get('error')}")
+            if isinstance(response, ErrorResponse):
+                logging.error(f"Failed to login: {response.message}")
                 return False
-            logging.info(f"Logged in as {self.client.user_id}")
-            return True
+            elif isinstance(response, LoginResponse):
+                logging.info(f"Logged in as {self.client.user_id}")
+                return True
+            else:
+                logging.error("Failed to login: Received unknown response type")
+                return False
         except Exception as e:
             logging.error(f"Exception during login: {e}")
             return False
@@ -67,7 +80,9 @@ class MatrixBotClient:
                 await self.send_message(room.room_id, "Please provide a search query.")
                 return
             query = parts[1]
-            logging.info(f"Received !pastes command with query: {query} in room {room.room_id} from {event.sender}")
+            logging.info(
+                f"Received !pastes command with query: {query} in room {room.room_id} from {event.sender}"
+            )
             await self.handle_pastes_command(room, query)
 
     async def send_message(self, room_id, message):
@@ -75,7 +90,7 @@ class MatrixBotClient:
             await self.client.room_send(
                 room_id=room_id,
                 message_type="m.room.message",
-                content={"msgtype": "m.text", "body": message}
+                content={"msgtype": "m.text", "body": message},
             )
         except SendRetryError as e:
             logging.error(f"Failed to send message to {room_id}: {e}")
@@ -116,28 +131,31 @@ class MatrixBotClient:
                 logging.debug(f"API Raw Response: {response_text}")
 
                 if response.status != 200:
-                    logging.error(f"API returned non-200 status code: {response.status}. Response text: {response_text}")
+                    logging.error(
+                        f"API returned non-200 status code: {response.status}. Response text: {response_text}"
+                    )
                     return None
 
                 try:
                     data = json.loads(response_text)
                     return data
                 except json.JSONDecodeError:
-                    logging.error(f"Failed to decode API response. Response text: {response_text}")
+                    logging.error(
+                        f"Failed to decode API response. Response text: {response_text}"
+                    )
                     return None
 
     async def send_via_bot(self, room_id, content: str, raw_data: str):
         """Send a message with a file attachment."""
         # Create a temporary file to store the content
         temp_filename = "temp_paste.txt"
-        with open(temp_filename, 'w', encoding='utf-8') as f:
+        with open(temp_filename, "w", encoding="utf-8") as f:
             f.write(raw_data)
 
         # Upload the file to the Matrix content repository
         try:
             response, _ = await self.client.upload(
-                temp_filename,
-                content_type="text/plain"
+                temp_filename, content_type="text/plain"
             )
 
             if isinstance(response, UploadResponse):
@@ -150,8 +168,9 @@ class MatrixBotClient:
                     content={
                         "msgtype": "m.file",
                         "body": "results.txt",
-                        "url": mxc_url
-                    }
+                        "filename": "results.txt",
+                        "url": mxc_url,
+                    },
                 )
             else:
                 logging.error(f"Failed to upload file: {response}")
@@ -163,7 +182,9 @@ class MatrixBotClient:
 
     async def handle_errors(self, room_id, error_message=None):
         """Handle errors by sending a user-friendly message."""
-        user_friendly_message = "An error occurred while processing your request. Please try again later."
+        user_friendly_message = (
+            "An error occurred while processing your request. Please try again later."
+        )
         logging.error(f"Error: {error_message if error_message else 'Unknown error'}")
         if error_message:
             user_friendly_message += f"\n\nDetails: {error_message}"
@@ -176,15 +197,21 @@ class MatrixBotClient:
             data = await self.fetch_psbdmp_data(query)
 
             if not data:
-                await self.send_message(room.room_id, "No data found for the given query.")
+                await self.send_message(
+                    room.room_id, "No data found for the given query."
+                )
                 return
 
             message = ""
             full_message = ""
 
             for idx, entry in enumerate(data):
-                text_sample = entry['text'].split("\n", 3)
-                initial_text = "\n".join(text_sample[:3]) if len(text_sample) > 3 else "\n".join(text_sample)
+                text_sample = entry["text"].split("\n", 3)
+                initial_text = (
+                    "\n".join(text_sample[:3])
+                    if len(text_sample) > 3
+                    else "\n".join(text_sample)
+                )
 
                 formatted_data = (
                     f"id     : {entry['id']}\n"
@@ -204,19 +231,25 @@ class MatrixBotClient:
             if not message:
                 message = "No data found for the given query."
 
-            await self.send_split_messages(room.room_id, f"Here are the top 20 results for {query}:")
+            await self.send_split_messages(
+                room.room_id, f"Here are the top 20 results for {query}:"
+            )
             await self.send_split_messages(room.room_id, message)
 
             # Now send the full_message as a .txt file
             if full_message:
-                await self.send_via_bot(room.room_id, "Here's the full formatted response:", full_message)
+                await self.send_via_bot(
+                    room.room_id, "Here's the full formatted response:", full_message
+                )
 
         except Exception as e:
             await self.handle_errors(room.room_id, str(e))
 
+
 def run_matrix_bot(homeserver, user_id, password):
     bot = MatrixBotClient(homeserver, user_id, password)
-    asyncio.get_event_loop().run_until_complete(bot.run())
+    asyncio.run(bot.run())
+
 
 if __name__ == "__main__":
     config = load_config()
